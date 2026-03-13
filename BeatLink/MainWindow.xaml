@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+  x:Class="BeatLink.MainWindow"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:local="using:BeatLink"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  mc:Ignorable="d"
+  Title="BeatLink">
+
+  <Window.SystemBackdrop>
+    <MicaBackdrop />
+  </Window.SystemBackdrop>
+
+  <Grid Background="{StaticResource RunnerRed}">
+    <Grid.RowDefinitions>
+      <!-- Title Bar -->
+      <RowDefinition Height="Auto" />
+      <!-- App Content -->
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <TitleBar x:Name="AppTitleBar" Title="BeatLink" Background="White" Foreground="Black">
+      <TitleBar.IconSource>
+        <ImageIconSource ImageSource="Assets/Eye.png" />
+      </TitleBar.IconSource>
+    </TitleBar>
+
+    <Grid Grid.Row="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+
+      <Image Source="Assets/BeatLink.svg" HorizontalAlignment="Center" VerticalAlignment="Center" Width="360" />
+
+      <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Button x:Name="LogInButton" Content="LOG IN" Click="LogInButton_Click" CornerRadius="9,0,9,0" Margin="0,0,0,9" Width="480" Height="48" />
+        <Button x:Name="ConnectButton" Content="CONNECT" Click="ConnectButton_Click" CornerRadius="0,9,0,9" Width="480" Height="48" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="18" Margin="0,0,0,18">
+        Please visit our website at <Hyperlink Foreground="White" NavigateUri="https://www.beatrevival.me">beatrevival.me</Hyperlink>
+      </TextBlock>
+    </Grid>
+  </Grid>
+</Window>
