@@ -39,6 +39,10 @@ public static class Memory
         if (!WriteProcessMemory(processHandle, unchecked((IntPtr)0x142DBE9B0), [0x31], 1, out bytesWritten))
             throw new Win32Exception();
 
+        // Disable LSX authentication code verification
+        if (!WriteProcessMemory(processHandle, unchecked((IntPtr)0x14388BCE6), [0x48, 0x90], 2, out bytesWritten))
+            throw new Win32Exception();
+
         // Bypass encryption of authenticated requests
         if (!WriteProcessMemory(processHandle, unchecked((IntPtr)0x1439C0D81), [0xE9, 0xC7, 0x00], 3, out bytesWritten))
             throw new Win32Exception();
