@@ -24,13 +24,23 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
 
+        // Set title bar colors
+        if (AppWindowTitleBar.IsCustomizationSupported())
+        {
+            AppWindow.TitleBar.ButtonForegroundColor = Microsoft.UI.Colors.Black;
+        }
+
         // Set main window dimensions
+        int windowWidth = 640;
+        int windowHeight = 480;
+
         if (AppWindow.Presenter is OverlappedPresenter presenter)
         {
-            presenter.IsResizable = false;
-            presenter.PreferredMaximumWidth = 640;
-            presenter.PreferredMaximumHeight = 480;
+            presenter.PreferredMinimumWidth = windowWidth;
+            presenter.PreferredMinimumHeight = windowHeight;
         }
+
+        AppWindow.Resize(new Windows.Graphics.SizeInt32(windowWidth, windowHeight));
     }
 
     private async void LogInButton_Click(object sender, RoutedEventArgs e)
