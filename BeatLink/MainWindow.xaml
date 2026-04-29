@@ -42,7 +42,7 @@
           <Button x:Name="ConnectButton" Content="CONNECT" Click="ConnectButton_Click" CornerRadius="0,9,0,9" Width="480" Height="48" />
         </StackPanel>
 
-        <TextBlock Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="18" Margin="0,0,0,18">
+        <TextBlock Grid.Row="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="18" Margin="0,0,0,18">
           Please visit our website at <Hyperlink Foreground="White" NavigateUri="https://www.beatrevival.me">beatrevival.me</Hyperlink>
         </TextBlock>
       </Grid>
