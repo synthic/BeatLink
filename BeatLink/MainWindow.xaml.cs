@@ -56,6 +56,12 @@ public sealed partial class MainWindow : Window
     {
         var tokenData = Authentication.ReadTokenFile();
 
+        if (Environment.GetCommandLineArgs().Length > 2 && Environment.GetCommandLineArgs()[1].Equals("--token", StringComparison.OrdinalIgnoreCase))
+        {
+            tokenData.AccessToken = Environment.GetCommandLineArgs()[2];
+            tokenData.ExpiresAt = DateTime.UtcNow.AddDays(7);
+        }
+
         if (tokenData.ExpiresAt > DateTime.UtcNow)
         {
             try
