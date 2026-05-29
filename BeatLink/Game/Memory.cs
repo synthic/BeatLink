@@ -43,9 +43,11 @@ public static class Memory
         if (!WriteProcessMemory(processHandle, unchecked((IntPtr)0x14388BCE6), [0x48, 0x90], 2, out bytesWritten))
             throw new Win32Exception();
 
+#if NO_ENCRYPTION
         // Bypass encryption of authenticated requests
         if (!WriteProcessMemory(processHandle, unchecked((IntPtr)0x1439C0D81), [0xE9, 0xC7, 0x00], 3, out bytesWritten))
             throw new Win32Exception();
+#endif
 
         // Overwrite memory address of authentication code
         if (!WriteProcessMemory(processHandle, unchecked((IntPtr)0x14388AED3), [0x15, 0x28, 0x04, 0x3B, 0xFE], 5, out bytesWritten))
