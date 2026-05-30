@@ -41,6 +41,9 @@ public sealed partial class MainWindow : Window
         }
 
         AppWindow.Resize(new Windows.Graphics.SizeInt32(windowWidth, windowHeight));
+
+        // Display a check mark if the user is logged in
+        CheckLoginStatus();
     }
 
     private async void LogInButton_Click(object sender, RoutedEventArgs e)
@@ -50,10 +53,14 @@ public sealed partial class MainWindow : Window
         await Authentication.GetTokenAsync();
 
         LogInButton.IsEnabled = true;
+
+        CheckLoginStatus();
     }
 
     private void ConnectButton_Click(object sender, RoutedEventArgs e)
     {
+        ConnectIcon.Opacity = 0;
+
         var tokenData = Authentication.ReadTokenFile();
 
         if (Environment.GetCommandLineArgs().Length > 2 && Environment.GetCommandLineArgs()[1].Equals("--token", StringComparison.OrdinalIgnoreCase))
@@ -67,6 +74,8 @@ public sealed partial class MainWindow : Window
             try
             {
                 Memory.ApplyPatches(tokenData.AccessToken);
+
+                ConnectIcon.Opacity = 1.0;
             }
             catch (IndexOutOfRangeException)
             {
@@ -94,5 +103,15 @@ public sealed partial class MainWindow : Window
         };
 
         await customDialog.ShowAsync();
+    }
+
+    private void CheckLoginStatus()
+    {
+        var tokenData = Authentication.ReadTokenFile();
+
+        if (tokenData.ExpiresAt > DateTime.UtcNow)
+        {
+            LogInIcon.Opacity = 1.0;
+        }
     }
 }

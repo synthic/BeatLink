@@ -37,6 +37,11 @@
 
         <Image Source="Assets/BeatLink.svg" HorizontalAlignment="Center" VerticalAlignment="Center" Width="360" />
 
+        <StackPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,82,0">
+          <FontIcon x:Name="LogInIcon" FontFamily="Segoe Fluent Icons" FontSize="32" Glyph="&#xE73E;" Foreground="White" Opacity="0" Margin="0,0,0,9" Height="48" />
+          <FontIcon x:Name="ConnectIcon" FontFamily="Segoe Fluent Icons" FontSize="32" Glyph="&#xE701;" Foreground="White" Opacity="0" Height="48" />
+        </StackPanel>
+
         <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
           <Button x:Name="LogInButton" Content="LOG IN" Click="LogInButton_Click" CornerRadius="9,0,9,0" Margin="0,0,0,9" Width="480" Height="48" />
           <Button x:Name="ConnectButton" Content="CONNECT" Click="ConnectButton_Click" CornerRadius="0,9,0,9" Width="480" Height="48" />
