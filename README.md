@@ -7,7 +7,7 @@ Designed and developed for the [Beat Revival](https://beatrevival.me) project.
 ## Usage
 
 > [!NOTE]
-> If any UI elements are not displaying properly, install the [Segoe Fluent Icons](https://aka.ms/SegoeFluentIcons) font.
+> If some UI elements are not displaying correctly, install the [Segoe Fluent Icons](https://aka.ms/SegoeFluentIcons) font.
 
 1. Run the app and click Log In.
 2. A browser window will open asking you to authenticate.
@@ -16,7 +16,7 @@ Designed and developed for the [Beat Revival](https://beatrevival.me) project.
 
 ## Building
 
-1. Install Visual Studio 2026 (including .NET desktop and WinUI application workloads).
+1. Install Visual Studio 2026 (including .NET desktop and WinUI application development workloads).
 2. Clone the repository and open the solution file.
 3. In the Solution Explorer, right click on the BeatLink project and click Publish.
 4. At the top, click the Publish button and the program will be built in the target directory.
