@@ -7,7 +7,7 @@ Designed and developed for the [Beat Revival](https://beatrevival.me) project.
 ## Usage
 
 > [!NOTE]
-> You only need to login once, unless the app tells you otherwise.
+> If any UI elements are not displaying properly, install the [Segoe Fluent Icons](https://aka.ms/SegoeFluentIcons) font.
 
 1. Run the app and click Log In.
 2. A browser window will open asking you to authenticate.
