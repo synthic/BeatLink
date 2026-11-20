@@ -8,7 +8,6 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-        <!-- Other merged dictionaries here -->
       </ResourceDictionary.MergedDictionaries>
 
       <Color x:Key="RunnerRed">#CE0808</Color>
@@ -22,7 +21,6 @@
         <Setter Property="HorizontalContentAlignment" Value="Left" />
       </Style>
 
-      <!-- Override specific default brush colors -->
       <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="White" />
       <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource RunnerRed}" />
       <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="White" />

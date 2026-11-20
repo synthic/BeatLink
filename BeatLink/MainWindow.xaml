@@ -9,15 +9,9 @@
   mc:Ignorable="d"
   Title="BeatLink">
 
-  <Window.SystemBackdrop>
-    <MicaBackdrop />
-  </Window.SystemBackdrop>
-
   <Grid Background="{StaticResource RunnerRed}">
     <Grid.RowDefinitions>
-      <!-- Title Bar -->
       <RowDefinition Height="Auto" />
-      <!-- App Content -->
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
@@ -38,17 +32,35 @@
         <Image Source="Assets/BeatLink.svg" HorizontalAlignment="Center" VerticalAlignment="Center" Width="360" />
 
         <StackPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,82,0">
-          <FontIcon x:Name="LogInIcon" FontFamily="Segoe Fluent Icons" FontSize="32" Glyph="&#xE73E;" Foreground="White" Opacity="0" Margin="0,0,0,9" Height="48" />
-          <FontIcon x:Name="ConnectIcon" FontFamily="Segoe Fluent Icons" FontSize="24" Glyph="&#xE701;" Foreground="White" Opacity="0" Height="48" />
+          <FontIcon x:Name="LogInIcon"
+                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                    FontSize="32" Glyph="&#xE73E;" Foreground="White" Opacity="0"
+                    Margin="0,0,0,9" Height="48"
+                    AutomationProperties.Name="Logged in" />
+          <FontIcon x:Name="ConnectIcon"
+                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                    FontSize="24" Glyph="&#xE701;" Foreground="White" Opacity="0" Height="48"
+                    AutomationProperties.Name="Connected to game" />
         </StackPanel>
 
-        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-          <Button x:Name="LogInButton" Content="LOG IN" Click="LogInButton_Click" CornerRadius="9,0,9,0" Margin="0,0,0,9" Width="480" Height="48" />
-          <Button x:Name="ConnectButton" Content="CONNECT" Click="ConnectButton_Click" CornerRadius="0,9,0,9" Width="480" Height="48" />
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="480">
+          <TextBox x:Name="ServerBox"
+                   Header="Server" PlaceholderText="localhost"
+                   Margin="0,0,0,9"
+                   AutomationProperties.Name="Server host" />
+          <Button x:Name="LogInButton" Content="LOG IN" Click="LogInButton_Click"
+                  CornerRadius="9,0,9,0" Margin="0,0,0,9" Width="480" Height="48" />
+          <Button x:Name="ConnectButton" Content="CONNECT" Click="ConnectButton_Click"
+                  CornerRadius="0,0,0,0" Margin="0,0,0,9" Width="480" Height="48" />
+          <Button x:Name="LogOutButton" Content="LOG OUT" Click="LogOutButton_Click"
+                  CornerRadius="0,9,0,9" Width="480" Height="48" />
+          <TextBlock x:Name="StatusText" Foreground="White" TextWrapping="Wrap"
+                     HorizontalAlignment="Center" TextAlignment="Center"
+                     FontSize="16" Margin="0,12,0,0" Text="" />
         </StackPanel>
 
         <TextBlock Grid.Row="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="18" Margin="0,0,0,18">
-          Please visit our website at <Hyperlink Foreground="White" NavigateUri="https://www.beatrevival.me">beatrevival.me</Hyperlink>
+          Please visit our website at <Hyperlink Foreground="White" NavigateUri="https://beatrevival.me">beatrevival.me</Hyperlink>
         </TextBlock>
       </Grid>
     </Viewbox>

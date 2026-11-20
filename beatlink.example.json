@@ -1,0 +1,7 @@
+{
+  "ClientId": "YOUR_DISCORD_CLIENT_ID",
+  "ServerHost": "localhost",
+  "Scope": "identify",
+  "RedirectPort": 14000,
+  "DisableEncryption": false
+}
