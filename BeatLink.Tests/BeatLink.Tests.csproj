@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <!--
+      A dependency-free test runner is used deliberately: the CI runner and this
+      environment both build offline, and NuGet restore of a full test SDK is not
+      always available. Tests are plain methods invoked from Program.Main and the
+      process exits non-zero on any failure, so `dotnet run` is the gate.
+    -->
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BeatLink.Core\BeatLink.Core.csproj" />
+  </ItemGroup>
+</Project>
