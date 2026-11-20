@@ -23,10 +23,13 @@ public sealed record BeatLinkOptions
     public string TokenUrl { get; init; } = "https://discord.com/api/oauth2/token";
 
     /// <summary>
-    /// Discord application (public) client id. Empty by default; login fails
-    /// with a clear message until it is set (B14).
+    /// Discord application (public) client id for the Beat Revival app. This is
+    /// the application's id (the same for every user, not personal and not
+    /// secret), compiled in so a source build logs in out of the box like the
+    /// release did. Overridable via beatlink.json for a different OAuth app. If
+    /// set empty, login fails with a clear message (B14).
     /// </summary>
-    public string ClientId { get; init; } = "";
+    public string ClientId { get; init; } = "1266123618753052784";
 
     /// <summary>OAuth scope to request. Only "identify" is needed (S7).</summary>
     public string Scope { get; init; } = "identify";

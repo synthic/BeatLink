@@ -25,11 +25,12 @@ public static class AuthorizeUrlTests
 
 public static class OptionsTests
 {
-    [Test("Defaults are loginable only once a client id is set (B14)")]
+    [Test("An empty client id fails loginable with a clear message (B14)")]
     public static void EnsureLoginable()
     {
-        Assert.Throws<InvalidOperationException>(() => BeatLinkOptions.Defaults.EnsureLoginable());
-        (BeatLinkOptions.Defaults with { ClientId = "123" }).EnsureLoginable(); // no throw
+        Assert.Throws<InvalidOperationException>(
+            () => (BeatLinkOptions.Defaults with { ClientId = "" }).EnsureLoginable());
+        BeatLinkOptions.Defaults.EnsureLoginable(); // baked-in id: no throw
     }
 
     [Test("--server overrides the host (I1)")]
