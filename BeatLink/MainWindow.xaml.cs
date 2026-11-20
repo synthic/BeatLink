@@ -53,7 +53,7 @@ public sealed partial class MainWindow : Window
         ServerBox.Text = _services.Options.ServerHost;
 
         // Poll for the game so Connect enables itself when it is available (I8).
-        _gameTimer = DispatcherQueue.CreateTimer();
+        _gameTimer = this.DispatcherQueue.CreateTimer();
         _gameTimer.Interval = TimeSpan.FromSeconds(2);
         _gameTimer.Tick += (s, e) => UpdateState();
         _gameTimer.Start();
@@ -281,7 +281,7 @@ public sealed partial class MainWindow : Window
     private void OnGameExited(object? sender, EventArgs e)
     {
         // Marshal back to the UI thread before touching XAML.
-        DispatcherQueue.TryEnqueue(() =>
+        this.DispatcherQueue.TryEnqueue(() =>
         {
             _connected = false;
             DetachGame();
