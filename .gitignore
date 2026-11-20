@@ -2,3 +2,6 @@
 .vs/
 bin/
 obj/
+
+# Local token store (never commit credentials)
+token.json
