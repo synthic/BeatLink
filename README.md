@@ -24,7 +24,7 @@ BeatLink reads an optional `beatlink.json` from `%LOCALAPPDATA%\BeatLink\`. See
 | Key | Meaning | Default |
 | --- | --- | --- |
 | `ClientId` | Discord application (public) client id. Required to log in. | *(empty)* |
-| `ServerHost` | Beat Revival server hostname the game is redirected to. | `localhost` |
+| `ServerHost` | Beat Revival redirector hostname the game is redirected to. | `redirector.ploxxy.dev` |
 | `Scope` | OAuth scope requested from Discord. | `identify` |
 | `RedirectPort` | Loopback port for the OAuth redirect. | `14000` |
 | `DisableEncryption` | Also apply the request-encryption bypass. | `false` |

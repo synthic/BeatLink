@@ -32,10 +32,12 @@ public sealed record BeatLinkOptions
     public string Scope { get; init; } = "identify";
 
     /// <summary>
-    /// Hostname the Beat Revival game server is reached on. Previously
-    /// hardcoded to "localhost" in the patcher (B14).
+    /// Hostname the Beat Revival redirector is reached on. Previously hardcoded
+    /// to "localhost" in the patcher (B14); the live service is
+    /// redirector.ploxxy.dev. Because the token is sent to this host with SSL
+    /// disabled, a non-loopback host makes S1 a real network exposure.
     /// </summary>
-    public string ServerHost { get; init; } = "localhost";
+    public string ServerHost { get; init; } = "redirector.ploxxy.dev";
 
     /// <summary>Loopback port the OAuth redirect listener binds to.</summary>
     public int RedirectPort { get; init; } = 14000;

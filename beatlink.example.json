@@ -1,6 +1,6 @@
 {
   "ClientId": "YOUR_DISCORD_CLIENT_ID",
-  "ServerHost": "localhost",
+  "ServerHost": "redirector.ploxxy.dev",
   "Scope": "identify",
   "RedirectPort": 14000,
   "DisableEncryption": false

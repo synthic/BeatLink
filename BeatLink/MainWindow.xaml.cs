@@ -61,7 +61,41 @@ public sealed partial class MainWindow : Window
         Closed += (s, e) => _loginCts?.Cancel();
 
         UpdateState();
+
+        if (HasFlag(args, "--capture"))
+            _ = CaptureExpectedBytesAsync();
     }
+
+    /// <summary>
+    /// Setup step: with an unpatched game running, record this machine's original
+    /// bytes at every patch site so Connect can verify the build (B4). Invoked via
+    /// the <c>--capture</c> launch flag.
+    /// </summary>
+    private async Task CaptureExpectedBytesAsync()
+    {
+        StatusText.Text = "Capturing expected bytes from the running game…";
+        try
+        {
+            BeatLinkOptions options = CurrentOptions();
+            string build = $"capture-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}";
+            ExpectedBytes captured = await Task.Run(() => GameConnection.Capture(options, build));
+            captured.Save(_services.ExpectedBytesPath);
+            StatusText.Text = $"Captured expected bytes ({captured.Hex.Count} sites). You can now Connect.";
+            Log.Info($"Captured expected bytes: {captured.Hex.Count} sites, build {build}.");
+        }
+        catch (GameNotRunningException ex)
+        {
+            await ShowDialogAsync("Game not found", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Log.Exception("CaptureExpectedBytesAsync", ex);
+            await ShowDialogAsync("Capture failed", ex.Message);
+        }
+    }
+
+    private static bool HasFlag(string[] args, string flag) =>
+        args.Any(a => a.Equals(flag, StringComparison.OrdinalIgnoreCase));
 
     // ---- Login (B1, B2, I7) -------------------------------------------------
 
