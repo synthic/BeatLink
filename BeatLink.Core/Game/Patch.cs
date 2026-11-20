@@ -30,5 +30,10 @@ public sealed record Patch(
     byte[] Expected,
     byte[] Replacement)
 {
-    public int Length => Expected.Length;
+    /// <summary>Region length. Equals <see cref="Replacement"/> length; <see cref="Expected"/>
+    /// may be empty when running unverified.</summary>
+    public int Length => Replacement.Length;
+
+    /// <summary>True when original bytes were supplied for this site, so it can be verified.</summary>
+    public bool CanVerify => Expected.Length > 0;
 }

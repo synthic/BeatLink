@@ -96,17 +96,27 @@ public static class PatchPlannerTests
         Assert.Equal(ApplyStatus.WriteFailed, result.Status);
     }
 
-    [Test("Missing captured expected bytes is InvalidTable, not a write (B4)")]
-    public static void MissingExpectedIsInvalid()
+    [Test("Without captured bytes, patches are written unverified (single build)")]
+    public static void MissingExpectedWritesAnyway()
     {
         (_, _, FakeProcessMemory mem, IReadOnlyList<Patch> _) = Arrange();
-        // A patch set whose Expected is empty.
+        // A patch set with no expected bytes at all.
         var empty = new ExpectedBytes();
         var options = BeatLinkOptions.Defaults with { ClientId = "x" };
         IReadOnlyList<Patch> patches = Patches.Build(options, "tok", empty);
 
-        PatchPlan plan = PatchPlanner.Plan(mem, patches);
-        Assert.Equal(PlanStatus.InvalidTable, plan.Status);
+        int size = patches.Max(p => (int)p.Rva + p.Length) + 16;
+        var freshMem = new FakeProcessMemory(mem.BaseAddress, size);
+
+        PatchPlan plan = PatchPlanner.Plan(freshMem, patches);
+        Assert.Equal(PlanStatus.ReadyToApply, plan.Status);
+        Assert.Equal(patches.Count, plan.Writes.Count);
+
+        // And applying still writes every replacement, ordered.
+        ApplyResult result = GamePatcher.Apply(freshMem, patches);
+        Assert.Equal(ApplyStatus.Applied, result.Status);
+        foreach (Patch p in patches)
+            Assert.BytesEqual(p.Replacement, freshMem.Read(freshMem.BaseAddress + p.Rva, p.Length));
     }
 
     [Test("Token buffer is zero-padded and reserves a terminator (B8)")]

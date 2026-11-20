@@ -35,6 +35,11 @@ public static class Patches
     private const nint RvaAuthCodeReference = 0x388AED3;
     private const nint RvaEncryptionBypass = 0x39C0D81;
 
+    // Fixed region sizes for the build (used to build replacements and to
+    // capture originals), independent of whether expected bytes exist.
+    private const int BufferSize = 256;
+    private const int HostRegionSize = 30;
+
     // Replacement bytes carried over verbatim from the original source.
     private static readonly byte[] ReplTokenPointer = [0x40, 0xB3, 0xC3, 0x41, 0x01, 0x00, 0x00, 0x00]; // full 8 bytes (B9)
     private static readonly byte[] ReplProtoSslConnect = [0x31];
@@ -67,33 +72,29 @@ public static class Patches
 
         // --- Data (written first) ---
 
-        // Token buffer: a zero-filled region exactly the captured size, with the
+        // Token buffer: a zero-filled region of the fixed cave size, with the
         // token copied in and the remainder (including a terminator) left zero
-        // (B8). Reject a token that does not fit.
-        byte[] bufExpected = expected.Get(TokenBuffer);
-        int bufSize = bufExpected.Length;
+        // (B8). Reject a token that does not fit. Sizes are fixed for the build
+        // rather than derived from captured bytes, so patching works without a
+        // capture; expected bytes are used only for verification when present.
         byte[] tokenBytes = Encoding.ASCII.GetBytes(token);
-        if (bufSize > 0 && tokenBytes.Length >= bufSize)
+        if (tokenBytes.Length >= BufferSize)
             throw new PatchBuildException(
-                $"Auth token is too long for the {bufSize}-byte buffer (needs a terminator).");
-        byte[] bufReplacement = new byte[bufSize];
-        if (bufSize > 0)
-            Array.Copy(tokenBytes, bufReplacement, tokenBytes.Length);
-        list.Add(new Patch(TokenBuffer, RvaTokenBuffer, PatchKind.Data, bufExpected, bufReplacement));
+                $"Auth token is too long for the {BufferSize}-byte buffer (needs a terminator).");
+        byte[] bufReplacement = new byte[BufferSize];
+        Array.Copy(tokenBytes, bufReplacement, tokenBytes.Length);
+        list.Add(new Patch(TokenBuffer, RvaTokenBuffer, PatchKind.Data, expected.Get(TokenBuffer), bufReplacement));
 
-        // Redirector hostname: ASCII, must fit the captured region with a null
+        // Redirector hostname: ASCII, must fit the fixed region with a null
         // terminator; the rest is zero-padded (B20).
-        byte[] hostExpected = expected.Get(RedirectorHostname);
-        int hostSize = hostExpected.Length;
         byte[] hostAscii = Encoding.ASCII.GetBytes(options.ServerHost);
-        if (hostSize > 0 && hostAscii.Length + 1 > hostSize)
+        if (hostAscii.Length + 1 > HostRegionSize)
             throw new PatchBuildException(
-                $"Server host \"{options.ServerHost}\" does not fit the {hostSize}-byte " +
+                $"Server host \"{options.ServerHost}\" does not fit the {HostRegionSize}-byte " +
                 "redirector field with a null terminator.");
-        byte[] hostReplacement = new byte[hostSize];
-        if (hostSize > 0)
-            Array.Copy(hostAscii, hostReplacement, hostAscii.Length);
-        list.Add(new Patch(RedirectorHostname, RvaRedirectorHostname, PatchKind.Data, hostExpected, hostReplacement));
+        byte[] hostReplacement = new byte[HostRegionSize];
+        Array.Copy(hostAscii, hostReplacement, hostAscii.Length);
+        list.Add(new Patch(RedirectorHostname, RvaRedirectorHostname, PatchKind.Data, expected.Get(RedirectorHostname), hostReplacement));
 
         // --- Pointer (written second) ---
         list.Add(new Patch(TokenPointer, RvaTokenPointer, PatchKind.Pointer,
@@ -119,9 +120,9 @@ public static class Patches
     {
         var layout = new List<(string, nint, int)>
         {
-            (TokenBuffer, RvaTokenBuffer, 256),
-            (RedirectorHostname, RvaRedirectorHostname, 30),
-            (TokenPointer, RvaTokenPointer, 8),
+            (TokenBuffer, RvaTokenBuffer, BufferSize),
+            (RedirectorHostname, RvaRedirectorHostname, HostRegionSize),
+            (TokenPointer, RvaTokenPointer, ReplTokenPointer.Length),
             (ProtoSslConnect, RvaProtoSslConnect, ReplProtoSslConnect.Length),
             (LsxAuthCheck, RvaLsxAuthCheck, ReplLsxAuthCheck.Length),
             (AuthCodeReference, RvaAuthCodeReference, ReplAuthCodeReference.Length),

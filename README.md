@@ -36,17 +36,19 @@ A Discord application must register the redirect URI
 `http://127.0.0.1:14000/callback/` (adjust the port to match `RedirectPort`) and
 be configured as a public client.
 
-## Supported game build
+## Game build
 
-The patcher writes to offsets relative to the game's module base and verifies the
-original bytes before writing, so it refuses to run against an unexpected or
-updated build rather than corrupting it.
+The patcher writes to offsets relative to the game's module base, writes data
+before the pointers that reference it and the activating code last, uses
+full-width values, and checks every write's byte count — so a half-applied or
+partial write can't silently leave the game inconsistent.
 
-Because the expected bytes are specific to a game copy, they are captured on your
-machine rather than shipped. With an **unpatched** game running, capture them
-once; they are stored in `%LOCALAPPDATA%\BeatLink\expected-bytes.json`. Until they
-are captured, Connect reports that the build is unverified instead of writing
-anything.
+Connect works out of the box against the supported build. Optionally, with an
+**unpatched** game running you can capture the original bytes once (launch with
+`--capture`); they are stored in `%LOCALAPPDATA%\BeatLink\expected-bytes.json`. If
+that file is present, Connect additionally verifies each site before writing
+(refusing an unexpected build) and can report "already patched" on a second
+press. Without it, the patches are simply applied.
 
 ## Troubleshooting
 

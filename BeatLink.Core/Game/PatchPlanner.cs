@@ -51,13 +51,12 @@ public static class PatchPlanner
 {
     public static PatchPlan Plan(IProcessMemory memory, IReadOnlyList<Patch> patches)
     {
-        // Validate the table before touching the target (I2).
+        // Validate the table before touching the target (I2). Expected bytes are
+        // optional: when a site carries them it is verified; when it does not, it
+        // is written unverified (there is a single supported game build).
         foreach (Patch p in patches)
         {
-            if (p.Expected.Length == 0)
-                return Invalid($"Patch \"{p.Name}\" has no captured original bytes. " +
-                               "Capture the expected bytes from an unpatched game build.");
-            if (p.Expected.Length != p.Replacement.Length)
+            if (p.CanVerify && p.Expected.Length != p.Replacement.Length)
                 return Invalid($"Patch \"{p.Name}\" expected/replacement length mismatch " +
                                $"({p.Expected.Length} vs {p.Replacement.Length}).");
         }
@@ -68,6 +67,14 @@ public static class PatchPlanner
 
         foreach (Patch p in patches)
         {
+            // Unverified site: no original bytes to compare, so write it.
+            if (!p.CanVerify)
+            {
+                anyNotApplied = true;
+                inspections.Add(new PatchInspection(p, PatchState.NotApplied));
+                continue;
+            }
+
             nint address = memory.BaseAddress + p.Rva;
             byte[] current = memory.Read(address, p.Length);
 
