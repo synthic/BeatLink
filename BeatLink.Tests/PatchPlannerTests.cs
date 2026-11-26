@@ -150,6 +150,17 @@ public static class PatchPlannerTests
         Assert.Throws<PatchBuildException>(() => Patches.Build(options, "tok", expected));
     }
 
+    [Test("ValidateHost accepts the live host and rejects bad ones (B20)")]
+    public static void ValidateHost()
+    {
+        Assert.True(Patches.ValidateHost("redirector.ploxxy.dev") is null, "live host rejected");
+        Assert.True(Patches.ValidateHost(new string('a', Patches.MaxHostLength)) is null, "max length rejected");
+        Assert.True(Patches.ValidateHost(new string('a', Patches.MaxHostLength + 1)) is not null, "too long accepted");
+        Assert.True(Patches.ValidateHost("") is not null, "empty accepted");
+        Assert.True(Patches.ValidateHost("bad host") is not null, "space accepted");
+        Assert.True(Patches.ValidateHost("sérver.dev") is not null, "non-ASCII accepted");
+    }
+
     [Test("Pointer and jump replacements are written full width (B9)")]
     public static void FullWidthPointer()
     {

@@ -14,8 +14,8 @@ namespace BeatLink.Web;
 /// to a result), B11 (loops until a request carries a matching state with code
 /// or error; reports the real outcome), B12 (awaits the token exchange),
 /// B13 (encoded authorize URL), B17 (listener and SHA in using/one-shot; one
-/// shared HttpClient), S2 (state), S6 (/callback path, 127.0.0.1), I9 (HTML
-/// result page).
+/// shared HttpClient), S2 (state, constant-time compared), I9 (HTML result
+/// page). Unrelated local requests are ignored rather than ending the flow.
 /// </summary>
 public sealed class OAuthClient
 {
@@ -81,7 +81,7 @@ public sealed class OAuthClient
             }
 
             // Loop until a callback carries our state with a code or an error.
-            // Unrelated local requests get a 404 and are ignored (B11, S6).
+            // Unrelated local requests get a 404 and are ignored (B11).
             while (true)
             {
                 HttpListenerContext context;
@@ -100,22 +100,26 @@ public sealed class OAuthClient
 
                 HttpListenerRequest request = context.Request;
 
-                if (request.HttpMethod != "GET" ||
-                    request.Url is null ||
-                    !request.Url.AbsolutePath.TrimEnd('/').EndsWith("/callback", StringComparison.Ordinal))
+                // The redirect lands on the registered URI's path (the Beat
+                // Revival app registers the root, "http://localhost:14000/"), so
+                // the OAuth callback is identified by its query, not its path.
+                string? returnedState = request.QueryString.Get("state");
+                string? error = request.QueryString.Get("error");
+                string? code = request.QueryString.Get("code");
+
+                if (request.HttpMethod != "GET" || (code is null && error is null))
                 {
+                    // Unrelated local request (e.g. a favicon fetch); ignore it.
                     await RespondAsync(context, HttpStatusCode.NotFound, NotFoundPage).ConfigureAwait(false);
                     continue;
                 }
 
-                string? returnedState = request.QueryString.Get("state");
                 if (!FixedTimeEquals(returnedState, state))
                 {
                     await RespondAsync(context, HttpStatusCode.BadRequest, MismatchPage).ConfigureAwait(false);
                     continue;
                 }
 
-                string? error = request.QueryString.Get("error");
                 if (error is not null)
                 {
                     bool denied = error.Equals("access_denied", StringComparison.OrdinalIgnoreCase);
@@ -126,7 +130,6 @@ public sealed class OAuthClient
                         : LoginResult.Failed($"Authorization failed: {error}");
                 }
 
-                string? code = request.QueryString.Get("code");
                 if (string.IsNullOrEmpty(code))
                 {
                     await RespondAsync(context, HttpStatusCode.BadRequest, FailedPage).ConfigureAwait(false);

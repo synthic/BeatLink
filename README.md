@@ -7,34 +7,40 @@ Designed and developed for the [Beat Revival](https://beatrevival.me) project.
 ## Usage
 
 1. Run the app and click **Log In**.
-2. A browser window opens asking you to authenticate. While it waits, the Log In
+2. A browser window opens asking you to authenticate. While it waits, the
    button becomes **Cancel**.
-3. When the page says you can return to the app, come back to BeatLink.
+3. When the page says you can return to the app, come back to BeatLink. The
+   button now reads **Log Out** and shows a tick.
 4. Start *Mirror's Edge™ Catalyst*. **Connect** enables itself once the game is
    detected.
 5. Click **Connect**.
 
-Use **Log Out** to delete the stored session.
+Click **Log Out** to delete the stored session.
+
+No configuration is needed: the Beat Revival client id and server are built in.
 
 ## Configuration
 
-BeatLink reads an optional `beatlink.json` from `%LOCALAPPDATA%\BeatLink\`. See
+Everything below is optional. BeatLink reads `beatlink.json` from
+`%LOCALAPPDATA%\BeatLink\` if it exists. See
 [`beatlink.example.json`](beatlink.example.json) for the full set of keys.
 
 | Key | Meaning | Default |
 | --- | --- | --- |
-| `ClientId` | Discord application (public) client id. Required to log in. | *(empty)* |
+| `ClientId` | Discord application (public) client id. | Beat Revival app |
 | `ServerHost` | Beat Revival redirector hostname the game is redirected to. | `redirector.ploxxy.dev` |
 | `Scope` | OAuth scope requested from Discord. | `identify` |
 | `RedirectPort` | Loopback port for the OAuth redirect. | `14000` |
 | `DisableEncryption` | Also apply the request-encryption bypass. | `false` |
 
-The server can also be overridden for a single run with `--server <host>`, or in
-the window's **Server** field.
+The server can also be changed for a single run with `--server <host>`, or from
+the **Server: …** link at the bottom of the window (max 29 ASCII characters).
 
-A Discord application must register the redirect URI
-`http://127.0.0.1:14000/callback/` (adjust the port to match `RedirectPort`) and
-be configured as a public client.
+The Beat Revival Discord application is already configured for this (public
+client, redirect `http://localhost:14000/`), so no setup is needed to use the
+default client id. If you point `ClientId` at your own Discord app instead, that
+app must register the redirect `http://localhost:14000/` (adjust the port to
+match `RedirectPort`) and be a public client.
 
 ## Game build
 

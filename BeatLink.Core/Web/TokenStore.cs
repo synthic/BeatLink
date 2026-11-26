@@ -74,13 +74,6 @@ public sealed class TokenStore
     }
 
     /// <summary>
-    /// Convenience read that returns an empty token for both "not present" and
-    /// "unreadable". Prefer <see cref="TryRead"/> when the caller needs to tell
-    /// the two apart.
-    /// </summary>
-    public TokenResponse Read() => TryRead().Token ?? TokenResponse.Empty;
-
-    /// <summary>
     /// Parses a token exchange response, stamps its absolute expiry, and writes
     /// it encrypted. Returns the parsed token. Throws on a null/invalid payload
     /// so login fails loudly instead of persisting "null" (B21).

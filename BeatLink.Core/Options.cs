@@ -5,9 +5,8 @@ namespace BeatLink;
 
 /// <summary>
 /// All externally configurable settings for BeatLink. Resolves I1 and B14:
-/// the server host, Discord client id, OAuth scope and redirect port are no
-/// longer compiled-in constants, so a source build can log in and a custom
-/// server can be targeted without recompiling.
+/// the server host, Discord client id, OAuth scope and redirect port have
+/// working compiled-in defaults but can be overridden without recompiling.
 ///
 /// Resolution order (lowest to highest precedence):
 ///   1. The compiled-in <see cref="Defaults"/>.
@@ -53,12 +52,15 @@ public sealed record BeatLinkOptions
     public bool DisableEncryption { get; init; } = false;
 
     /// <summary>
-    /// Loopback redirect URI registered with Discord. RFC 8252 recommends the
-    /// IP literal over "localhost" (S6). The fixed <c>/callback</c> path lets
-    /// the listener reject unrelated local requests (S6, B11).
+    /// Loopback redirect URI. This must exactly match a redirect registered on
+    /// the Discord application; the Beat Revival app registers the loopback root
+    /// "http://localhost:14000/", so that is the default. (RFC 8252 would prefer
+    /// the 127.0.0.1 literal and a dedicated path per S6, but that can only be
+    /// used by whoever owns the Discord app and can register it.) CSRF is still
+    /// covered by the <c>state</c> check (S2).
     /// </summary>
     [JsonIgnore]
-    public string RedirectUri => $"http://127.0.0.1:{RedirectPort}/callback/";
+    public string RedirectUri => $"http://localhost:{RedirectPort}/";
 
     /// <summary>Compiled-in defaults.</summary>
     public static BeatLinkOptions Defaults { get; } = new();
@@ -120,8 +122,8 @@ public sealed record BeatLinkOptions
     {
         if (string.IsNullOrWhiteSpace(ClientId))
             throw new InvalidOperationException(
-                "No Discord client id is configured. Set \"ClientId\" in beatlink.json " +
-                "next to the app before logging in.");
+                "No Discord client id is configured. Set \"ClientId\" in " +
+                "%LOCALAPPDATA%\\BeatLink\\beatlink.json (or remove the empty value) and try again.");
     }
 }
 

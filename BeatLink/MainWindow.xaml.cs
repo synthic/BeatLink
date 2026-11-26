@@ -7,6 +7,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 
 namespace BeatLink;
 
@@ -18,13 +19,14 @@ public sealed partial class MainWindow : Window
     private static readonly TimeSpan LoginTimeout = TimeSpan.FromMinutes(5);
 
     private readonly AppServices _services;
-    private readonly TokenResponse? _injectedToken;
+    private TokenResponse? _injectedToken; // BEATLINK_TOKEN / debug --token; cleared by Log Out
     private readonly DispatcherQueueTimer _gameTimer;
 
     private CancellationTokenSource? _loginCts;
     private bool _dialogShowing;      // B18 re-entry guard
     private bool _connected;          // drives the connect tick
     private GameProcess? _connectedGame;
+    private string _serverHost;       // session server, editable from the flyout
 
     public MainWindow()
     {
@@ -50,7 +52,8 @@ public sealed partial class MainWindow : Window
         string[] args = Environment.GetCommandLineArgs();
         _services = AppServices.Create(args);
         _injectedToken = ResolveInjectedToken(args);
-        ServerBox.Text = _services.Options.ServerHost;
+        _serverHost = _services.Options.ServerHost;
+        UpdateServerButton();
 
         // Poll for the game so Connect enables itself when it is available (I8).
         _gameTimer = this.DispatcherQueue.CreateTimer();
@@ -97,9 +100,9 @@ public sealed partial class MainWindow : Window
     private static bool HasFlag(string[] args, string flag) =>
         args.Any(a => a.Equals(flag, StringComparison.OrdinalIgnoreCase));
 
-    // ---- Login (B1, B2, I7) -------------------------------------------------
+    // ---- Auth: LOG IN -> CANCEL -> LOG OUT (B1, B2, I7, S7) -----------------
 
-    private async void LogInButton_Click(object sender, RoutedEventArgs e)
+    private async void AuthButton_Click(object sender, RoutedEventArgs e)
     {
         // While a login is in flight the button acts as Cancel (I7, B1).
         if (_loginCts is not null)
@@ -108,9 +111,21 @@ public sealed partial class MainWindow : Window
             return;
         }
 
+        TokenResponse? token = EffectiveToken();
+        if (token is not null && IsUsable(token))
+        {
+            LogOut();
+            return;
+        }
+
+        await LogInAsync();
+    }
+
+    private async Task LogInAsync()
+    {
         var cts = new CancellationTokenSource(LoginTimeout);
         _loginCts = cts;
-        LogInButton.Content = "CANCEL";
+        UpdateState(); // flips the button to CANCEL
         StatusText.Text = "Waiting for browser…";
 
         try
@@ -136,7 +151,7 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             // Safety net so a login failure can never crash the app (B2).
-            Log.Exception("LogInButton_Click", ex);
+            Log.Exception("LogInAsync", ex);
             StatusText.Text = "Login failed.";
             await ShowDialogAsync("Login failed", ex.Message);
         }
@@ -144,8 +159,7 @@ public sealed partial class MainWindow : Window
         {
             _loginCts = null;
             cts.Dispose();
-            LogInButton.Content = "LOG IN";
-            UpdateState();
+            UpdateState(); // flips the button to LOG IN or LOG OUT
         }
     }
 
@@ -219,9 +233,10 @@ public sealed partial class MainWindow : Window
 
     // ---- Log out (S7) -------------------------------------------------------
 
-    private void LogOutButton_Click(object sender, RoutedEventArgs e)
+    private void LogOut()
     {
         _services.TokenStore.Clear();
+        _injectedToken = null;
         _connected = false;
         DetachGame();
         StatusText.Text = "Logged out.";
@@ -241,8 +256,12 @@ public sealed partial class MainWindow : Window
     {
         TokenResponse? token = EffectiveToken();
         bool loggedIn = token is not null && IsUsable(token);
+        bool loginInFlight = _loginCts is not null;
 
-        LogInIcon.Opacity = loggedIn ? 1.0 : 0.0;
+        AuthButtonText.Text = loginInFlight ? "CANCEL" : loggedIn ? "LOG OUT" : "LOG IN";
+        AutomationProperties.SetName(AuthButton, AuthButtonText.Text);
+
+        LogInIcon.Opacity = loggedIn && !loginInFlight ? 1.0 : 0.0;
         if (loggedIn)
         {
             string expiry = $"Logged in – session valid until {token!.ExpiresAt.ToLocalTime():g}";
@@ -258,9 +277,7 @@ public sealed partial class MainWindow : Window
         ConnectIcon.Opacity = _connected ? 1.0 : 0.0;
         AutomationProperties.SetName(ConnectIcon, _connected ? "Connected to game" : "Not connected");
 
-        bool loginInFlight = _loginCts is not null;
         ConnectButton.IsEnabled = loggedIn && !loginInFlight && GameProcess.IsRunning();
-        LogOutButton.IsEnabled = loggedIn && !loginInFlight;
     }
 
     private void AttachGame(GameProcess game)
@@ -285,18 +302,77 @@ public sealed partial class MainWindow : Window
         {
             _connected = false;
             DetachGame();
+            StatusText.Text = "Game closed. Press Connect again after restarting it.";
             UpdateState();
         });
     }
 
     // ---- Helpers ------------------------------------------------------------
 
-    private BeatLinkOptions CurrentOptions()
+    private BeatLinkOptions CurrentOptions() =>
+        _services.Options with { ServerHost = _serverHost };
+
+    // ---- Server flyout ------------------------------------------------------
+
+    private void UpdateServerButton()
     {
-        string host = string.IsNullOrWhiteSpace(ServerBox.Text)
-            ? _services.Options.ServerHost
-            : ServerBox.Text.Trim();
-        return _services.Options with { ServerHost = host };
+        ServerButton.Content = $"Server: {_serverHost}";
+        ToolTipService.SetToolTip(ServerButton, "Change the server BeatLink connects the game to");
+    }
+
+    private void ServerButton_Click(object sender, RoutedEventArgs e) =>
+        FlyoutBase.ShowAttachedFlyout(ServerButton);
+
+    private void ServerFlyout_Opening(object? sender, object e)
+    {
+        ServerBox.Header = "Server";
+        ServerBox.Text = _serverHost;
+        ServerBox.SelectAll();
+    }
+
+    private void SaveServer_Click(object sender, RoutedEventArgs e) => SaveServer();
+
+    private void ResetServer_Click(object sender, RoutedEventArgs e)
+    {
+        ServerBox.Text = _services.Options.ServerHost;
+        SaveServer();
+    }
+
+    private void ServerBox_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
+        {
+            SaveServer();
+            e.Handled = true;
+        }
+    }
+
+    private void SaveServer()
+    {
+        string host = ServerBox.Text.Trim();
+        if (host.Length == 0)
+            host = _services.Options.ServerHost;
+
+        // Reject a host that cannot fit the game's redirector field now, rather
+        // than failing later on Connect (B20). Keep the flyout open to fix it.
+        if (Patches.ValidateHost(host) is string problem)
+        {
+            ServerBox.Header = problem;
+            return;
+        }
+        ServerBox.Header = "Server";
+
+        if (host != _serverHost)
+        {
+            _serverHost = host;
+            // A different server means the game needs patching again.
+            _connected = false;
+            DetachGame();
+            UpdateState();
+        }
+
+        UpdateServerButton();
+        ServerFlyout.Hide();
     }
 
     private TokenResponse? EffectiveToken()

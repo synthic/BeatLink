@@ -31,37 +31,67 @@
 
         <Image Source="Assets/BeatLink.svg" HorizontalAlignment="Center" VerticalAlignment="Center" Width="360" />
 
-        <StackPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,82,0">
-          <FontIcon x:Name="LogInIcon"
-                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                    FontSize="32" Glyph="&#xE73E;" Foreground="White" Opacity="0"
-                    Margin="0,0,0,9" Height="48"
-                    AutomationProperties.Name="Logged in" />
-          <FontIcon x:Name="ConnectIcon"
-                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                    FontSize="24" Glyph="&#xE701;" Foreground="White" Opacity="0" Height="48"
-                    AutomationProperties.Name="Connected to game" />
-        </StackPanel>
-
         <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="480">
-          <TextBox x:Name="ServerBox"
-                   Header="Server" PlaceholderText="localhost"
-                   Margin="0,0,0,9"
-                   AutomationProperties.Name="Server host" />
-          <Button x:Name="LogInButton" Content="LOG IN" Click="LogInButton_Click"
-                  CornerRadius="9,0,9,0" Margin="0,0,0,9" Width="480" Height="48" />
-          <Button x:Name="ConnectButton" Content="CONNECT" Click="ConnectButton_Click"
-                  CornerRadius="0,0,0,0" Margin="0,0,0,9" Width="480" Height="48" />
-          <Button x:Name="LogOutButton" Content="LOG OUT" Click="LogOutButton_Click"
-                  CornerRadius="0,9,0,9" Width="480" Height="48" />
+
+          <!-- One button for the whole session: LOG IN -> CANCEL -> LOG OUT. -->
+          <Button x:Name="AuthButton" Click="AuthButton_Click"
+                  CornerRadius="9,0,9,0" Margin="0,0,0,9" Width="480" Height="48"
+                  HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+            <Grid>
+              <TextBlock x:Name="AuthButtonText" Text="LOG IN" VerticalAlignment="Center" />
+              <!-- No explicit Foreground: inherits the button's, so it follows hover/pressed colours. -->
+              <FontIcon x:Name="LogInIcon"
+                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                        FontSize="22" Glyph="&#xE73E;"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0"
+                        Opacity="0"
+                        AutomationProperties.Name="Not logged in" />
+            </Grid>
+          </Button>
+
+          <Button x:Name="ConnectButton" Click="ConnectButton_Click"
+                  CornerRadius="0,9,0,9" Width="480" Height="48"
+                  HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+            <Grid>
+              <TextBlock Text="CONNECT" VerticalAlignment="Center" />
+              <FontIcon x:Name="ConnectIcon"
+                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                        FontSize="20" Glyph="&#xE701;"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0"
+                        Opacity="0"
+                        AutomationProperties.Name="Not connected" />
+            </Grid>
+          </Button>
+
           <TextBlock x:Name="StatusText" Foreground="White" TextWrapping="Wrap"
                      HorizontalAlignment="Center" TextAlignment="Center"
-                     FontSize="16" Margin="0,12,0,0" Text="" />
+                     FontSize="16" Margin="0,14,0,0" MinHeight="22" Text="" />
         </StackPanel>
 
-        <TextBlock Grid.Row="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="18" Margin="0,0,0,18">
-          Please visit our website at <Hyperlink Foreground="White" NavigateUri="https://beatrevival.me">beatrevival.me</Hyperlink>
-        </TextBlock>
+        <StackPanel Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,14">
+          <!-- Server is a secondary setting: a small link that opens a flyout. -->
+          <!-- HyperlinkButton has no Flyout property (that lives on Button), so
+               the flyout is attached and opened from Click. -->
+          <HyperlinkButton x:Name="ServerButton" Click="ServerButton_Click" HorizontalAlignment="Center"
+                           FontSize="14" Padding="6,2" Margin="0,0,0,4"
+                           AutomationProperties.Name="Change server">
+            <FlyoutBase.AttachedFlyout>
+              <Flyout x:Name="ServerFlyout" Opening="ServerFlyout_Opening" Placement="Top">
+                <StackPanel Width="300" Spacing="10">
+                  <TextBox x:Name="ServerBox" Header="Server" KeyDown="ServerBox_KeyDown" />
+                  <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                    <Button Content="Reset" Click="ResetServer_Click" Style="{StaticResource DefaultButtonStyle}" />
+                    <Button Content="Save" Click="SaveServer_Click" Style="{StaticResource AccentButtonStyle}" />
+                  </StackPanel>
+                </StackPanel>
+              </Flyout>
+            </FlyoutBase.AttachedFlyout>
+          </HyperlinkButton>
+
+          <TextBlock Foreground="White" HorizontalAlignment="Center" FontSize="18">
+            Please visit our website at <Hyperlink Foreground="White" NavigateUri="https://beatrevival.me">beatrevival.me</Hyperlink>
+          </TextBlock>
+        </StackPanel>
       </Grid>
     </Viewbox>
   </Grid>

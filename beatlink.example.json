@@ -1,5 +1,5 @@
 {
-  "ClientId": "YOUR_DISCORD_CLIENT_ID",
+  "ClientId": "1266123618753052784",
   "ServerHost": "redirector.ploxxy.dev",
   "Scope": "identify",
   "RedirectPort": 14000,

@@ -10,8 +10,9 @@ namespace BeatLink.Game;
 ///
 /// Offsets are relative to the module base (B4). Replacement bytes for the code
 /// patches are the same values the original source wrote; the data patches
-/// (token buffer, pointer, hostname) are built at runtime. Expected bytes come
-/// from <see cref="ExpectedBytes"/>, captured per build.
+/// (token buffer, pointer, hostname) are built at runtime. Expected bytes are
+/// optional: when an <see cref="ExpectedBytes"/> capture exists each site is
+/// verified, otherwise the patches are applied unverified (single build).
 /// </summary>
 public static class Patches
 {
@@ -40,25 +41,30 @@ public static class Patches
     private const int BufferSize = 256;
     private const int HostRegionSize = 30;
 
+    /// <summary>Longest server host that fits the redirector field with its terminator (B20).</summary>
+    public const int MaxHostLength = HostRegionSize - 1;
+
+    /// <summary>
+    /// Returns null when <paramref name="host"/> can be written to the redirector
+    /// field, otherwise a user-facing reason (B20).
+    /// </summary>
+    public static string? ValidateHost(string host)
+    {
+        if (string.IsNullOrWhiteSpace(host))
+            return "Enter a server host.";
+        if (host.Any(c => c > 0x7F || char.IsWhiteSpace(c)))
+            return "The server host must be plain ASCII with no spaces.";
+        if (host.Length > MaxHostLength)
+            return $"The server host is too long (max {MaxHostLength} characters).";
+        return null;
+    }
+
     // Replacement bytes carried over verbatim from the original source.
     private static readonly byte[] ReplTokenPointer = [0x40, 0xB3, 0xC3, 0x41, 0x01, 0x00, 0x00, 0x00]; // full 8 bytes (B9)
     private static readonly byte[] ReplProtoSslConnect = [0x31];
     private static readonly byte[] ReplLsxAuthCheck = [0x48, 0x90];
     private static readonly byte[] ReplAuthCodeReference = [0x15, 0x28, 0x04, 0x3B, 0xFE];
     private static readonly byte[] ReplEncryptionBypass = [0xE9, 0xC7, 0x00];
-
-    /// <summary>The patch names that must have captured expected bytes for the current options.</summary>
-    public static IEnumerable<string> RequiredNames(BeatLinkOptions options)
-    {
-        yield return TokenBuffer;
-        yield return TokenPointer;
-        yield return RedirectorHostname;
-        yield return ProtoSslConnect;
-        yield return LsxAuthCheck;
-        yield return AuthCodeReference;
-        if (options.DisableEncryption)
-            yield return EncryptionBypass;
-    }
 
     /// <summary>
     /// Builds the ordered patch set for the given token and configuration.

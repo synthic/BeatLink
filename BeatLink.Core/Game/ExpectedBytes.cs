@@ -4,13 +4,12 @@ using System.Text.Json.Serialization;
 namespace BeatLink.Game;
 
 /// <summary>
-/// The original ("expected") bytes at each patch location, captured once from an
-/// unpatched game build. The planner needs these to verify the target before
-/// writing (B4) and to tell "not patched" from "already patched" (I3).
-///
-/// These are not shipped: a build's layout is specific to a user's own game
-/// copy, so BeatLink captures them on that machine (see
-/// <see cref="GamePatcher.Capture"/>) rather than embedding them.
+/// The original ("expected") bytes at each patch location, optionally captured
+/// once from an unpatched game (<c>--capture</c>, see
+/// <see cref="GamePatcher.Capture"/>). When present, the planner uses them to
+/// verify each site before writing (B4) and to tell "not patched" from
+/// "already patched" (I3). When absent, patches are applied unverified, which is
+/// fine for the single supported game build.
 /// </summary>
 public sealed class ExpectedBytes
 {
@@ -33,8 +32,6 @@ public sealed class ExpectedBytes
     }
 
     public byte[] Get(string name) => TryGet(name, out byte[] b) ? b : [];
-
-    public bool IsComplete(IEnumerable<string> names) => names.All(n => TryGet(n, out _));
 
     public static ExpectedBytes LoadOrEmpty(string path)
     {

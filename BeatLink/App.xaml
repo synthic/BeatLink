@@ -21,6 +21,10 @@
         <Setter Property="HorizontalContentAlignment" Value="Left" />
       </Style>
 
+      <SolidColorBrush x:Key="HyperlinkButtonForeground" Color="#E6FFFFFF" />
+      <SolidColorBrush x:Key="HyperlinkButtonForegroundPointerOver" Color="White" />
+      <SolidColorBrush x:Key="HyperlinkButtonForegroundPressed" Color="#B3FFFFFF" />
+
       <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="White" />
       <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource RunnerRed}" />
       <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="White" />

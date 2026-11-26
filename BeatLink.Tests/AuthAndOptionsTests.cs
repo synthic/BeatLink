@@ -40,10 +40,10 @@ public static class OptionsTests
         Assert.Equal("play.example.com", o.ServerHost);
     }
 
-    [Test("RedirectUri uses the loopback IP literal and /callback (S6)")]
+    [Test("RedirectUri matches the registered loopback root")]
     public static void RedirectUriShape()
     {
-        Assert.Equal("http://127.0.0.1:14000/callback/", BeatLinkOptions.Defaults.RedirectUri);
+        Assert.Equal("http://localhost:14000/", BeatLinkOptions.Defaults.RedirectUri);
     }
 
     [Test("Default scope is identify only (S7)")]
